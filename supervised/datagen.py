@@ -17,18 +17,50 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+import sys
 import os
 import struct
+import random
+import multiprocessing
 import chess
 import chess.engine
 
 PARENT = os.path.dirname(os.path.realpath(__file__))
 ENG_PATH = input("Engine path: ")
 OUT_PATH = os.path.join(PARENT, "out.dat")
+THREADS = multiprocessing.cpu_count()
+DEPTH = 20
+
+
+def log(msg):
+    sys.stdout.write("\r"+" "*80+"\r")
+    sys.stdout.write(msg)
+    sys.stdout.flush()
+
+
+def randpos():
+    board = chess.Board()
+    num_moves = random.randint(10, 60)
+    for i in range(num_moves):
+        moves = list(board.generate_legal_moves())
+        if len(moves) == 0:
+            break
+        board.push(random.choice(moves))
+    return board
 
 
 def main():
-    pass
+    engine = chess.engine.SimpleEngine.popen_uci(ENG_PATH)
+    if "Threads" in engine.options:
+        engine.configure({"Threads": THREADS})
+
+    positions = 0
+    while True:
+        board = randpos()
+        result = engine.analyse(board, chess.engine.Limit(depth=DEPTH))
+
+        positions += 1
+        log(f"Analyzed {positions} positions.")
 
 
 main()
