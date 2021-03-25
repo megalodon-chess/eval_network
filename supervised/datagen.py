@@ -26,7 +26,11 @@ import chess
 import chess.engine
 
 PARENT = os.path.dirname(os.path.realpath(__file__))
-ENG_PATH = input("Engine path: ")
+if os.path.isfile(os.path.join(PARENT, "path.txt")):
+    with open(os.path.join(PARENT, "path.txt"), "r") as file:
+        ENG_PATH = file.read().strip()
+else:
+    ENG_PATH = input("Engine path: ")
 OUT_PATH = os.path.join(PARENT, "out.dat")
 THREADS = multiprocessing.cpu_count()
 DEPTH = 20
@@ -56,11 +60,17 @@ def main():
 
     positions = 0
     while True:
-        board = randpos()
-        result = engine.analyse(board, chess.engine.Limit(depth=DEPTH))
+        try:
+            board = randpos()
+            result = engine.analyse(board, chess.engine.Limit(depth=DEPTH))
 
-        positions += 1
-        log(f"Analyzed {positions} positions.")
+            positions += 1
+            log(f"Analyzed {positions} positions.")
+        except KeyboardInterrupt:
+            print("Terminated")
+            break
+
+    engine.quit()
 
 
 main()
