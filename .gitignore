@@ -2,3 +2,4 @@ __pycache__
 .vscode
 
 /supervised/path.txt
+/supervised/*.dat
