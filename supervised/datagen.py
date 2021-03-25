@@ -53,22 +53,38 @@ def randpos():
     return board
 
 
+def piece_char(piece: chess.Piece):
+    if piece is None:
+        return chr(0).encode()
+    return piece.symbol().encode()
+
+
+def append_result(file, board, result):
+    score = result["score"].pov(chess.WHITE).score(mate_score=100000)
+    for i in range(64):
+        file.write(piece_char(board.piece_at(i)))
+    file.write(struct.pack("f", score/100))
+
+
 def main():
     engine = chess.engine.SimpleEngine.popen_uci(ENG_PATH)
     if "Threads" in engine.options:
         engine.configure({"Threads": THREADS})
 
-    positions = 0
-    while True:
-        try:
-            board = randpos()
-            result = engine.analyse(board, chess.engine.Limit(depth=DEPTH))
+    with open(OUT_PATH, "wb") as file:
+        positions = 0
+        while True:
+            try:
+                board = randpos()
+                result = engine.analyse(board, chess.engine.Limit(depth=DEPTH))
+                append_result(file, board, result)
+                file.flush()
 
-            positions += 1
-            log(f"Analyzed {positions} positions.")
-        except KeyboardInterrupt:
-            print("Terminated")
-            break
+                positions += 1
+                log(f"Analyzed {positions} positions.")
+            except KeyboardInterrupt:
+                print("Terminated")
+                break
 
     engine.quit()
 
