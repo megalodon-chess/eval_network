@@ -83,6 +83,7 @@ def main():
                 positions += 1
                 log(f"Analyzed {positions} positions.")
             except KeyboardInterrupt:
+                file.flush()
                 print("Terminated")
                 break
 
